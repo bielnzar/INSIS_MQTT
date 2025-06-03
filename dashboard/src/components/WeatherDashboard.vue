@@ -1,7 +1,5 @@
 <template>
   <div class="w-full mt-5">
-    {/* mt-5 dari App.vue style sebelumnya, bisa dihapus jika spacing diatur
-    dari App.vue */}
     <div
       v-if="isLoading && (!forecasts || forecasts.length === 0)"
       class="text-center p-10 text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded-lg min-h-[150px] flex flex-col items-center justify-center"
@@ -68,5 +66,3 @@ export default {
   },
 };
 </script>
-
-<!-- Hapus atau komentari tag <style scoped> yang lama -->

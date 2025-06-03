@@ -1,28 +1,19 @@
-# publisher_bmkg_continuous.py
 import requests
 import json
 import time
 import paho.mqtt.client as mqtt
-import sys # Untuk sys.exit pada KeyboardInterrupt
+import sys
 
-# --- Konfigurasi ---
 BMKG_API_URL = "https://api.bmkg.go.id/publik/prakiraan-cuaca"
-ADM4_CODE = "35.78.09.1001" # Ganti dengan kode wilayah yang valid
+ADM4_CODE = "35.78.09.1001"
 
 MQTT_BROKER_HOST = "localhost"
 MQTT_BROKER_PORT = 1883
-MQTT_CLIENT_ID = "bmkg_publisher_continuous_py_002" # ID unik
+MQTT_CLIENT_ID = "bmkg_publisher_continuous_py_002"
 
 MQTT_TOPIC_BASE = "bmkg/weather/forecast"
 
-# Interval pengambilan data dalam detik
-# Misalnya:
-# 10 menit = 10 * 60 = 600 detik
-# 30 menit = 30 * 60 = 1800 detik
-# 1 jam    = 60 * 60 = 3600 detik
-# 6 jam    = 6 * 3600 = 21600 detik
-FETCH_INTERVAL_SECONDS = 600 # Default: Ambil setiap 10 menit (untuk testing)
-                                # Sesuaikan ini sesuai kebutuhan Anda!
+FETCH_INTERVAL_SECONDS = 60
 
 def fetch_bmkg_data(api_url, adm4):
     full_url = f"{api_url}?adm4={adm4}"
@@ -53,11 +44,11 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     print(f"Publisher: Terputus dari MQTT Broker dengan kode: {rc}. Mencoba menghubungkan kembali...")
-    # Anda mungkin ingin menambahkan logika reconnect di sini jika Paho default tidak cukup
 
 def on_publish(client, userdata, mid):
-    # print(f"Publisher: Pesan {mid} telah dipublikasikan.") # Aktifkan untuk debug detail
     pass
+
+MQTT_QOS = 1
 
 def process_and_publish_data(mqtt_client, weather_data_raw):
     if weather_data_raw and "data" in weather_data_raw and weather_data_raw["data"] and "lokasi" in weather_data_raw:
@@ -80,7 +71,7 @@ def process_and_publish_data(mqtt_client, weather_data_raw):
             
             if not all_forecasts_for_location:
                 print("Publisher: Tidak ada item prakiraan di dalam array 'cuaca'.")
-                return False # Menandakan tidak ada data yang dipublish
+                return False
 
             print(f"Publisher: Ditemukan {len(all_forecasts_for_location)} periode prakiraan. Memulai publikasi...")
             published_count = 0
@@ -108,7 +99,7 @@ def process_and_publish_data(mqtt_client, weather_data_raw):
                     return False # Berhenti memproses jika koneksi putus
 
             print(f"Publisher: {published_count} dari {len(all_forecasts_for_location)} data prakiraan berhasil diproses untuk publikasi.")
-            return True # Sukses mempublish sesuatu
+            return True # Sukses mempublish
         else:
             print("Publisher: Key 'cuaca' tidak ditemukan dalam respons data BMKG (di dalam 'data[0]').")
     else:
@@ -118,7 +109,7 @@ def process_and_publish_data(mqtt_client, weather_data_raw):
 def main_loop():
     mqtt_publisher = mqtt.Client(client_id=MQTT_CLIENT_ID)
     mqtt_publisher.on_connect = on_connect
-    mqtt_publisher.on_disconnect = on_disconnect # Tambahkan callback on_disconnect
+    mqtt_publisher.on_disconnect = on_disconnect # callback on_disconnect
     mqtt_publisher.on_publish = on_publish
 
     # Mencoba terhubung terus menerus jika gagal
@@ -142,15 +133,14 @@ def main_loop():
         while True:
             if not mqtt_publisher.is_connected():
                 print("Publisher: Koneksi MQTT terputus. Mencoba menghubungkan kembali di iterasi berikutnya...")
-                # Paho client dengan loop_start() biasanya akan mencoba reconnect otomatis
-                # Tapi kita bisa juga secara eksplisit mencoba connect lagi
+                # Paho client dengan loop_start() akan mencoba reconnect otomatis
                 try:
-                    mqtt_publisher.reconnect() # Coba reconnect
+                    mqtt_publisher.reconnect()
                     print("Publisher: Reconnect attempt...")
                 except Exception as e_reconnect:
                     print(f"Publisher: Gagal reconnect: {e_reconnect}")
                 time.sleep(10) # Tunggu sebelum iterasi berikutnya jika reconnect gagal
-                continue # Lanjut ke iterasi berikutnya untuk cek koneksi lagi
+                continue
 
             weather_data_raw = fetch_bmkg_data(BMKG_API_URL, ADM4_CODE)
             
@@ -172,7 +162,7 @@ def main_loop():
             mqtt_publisher.loop_stop()
             mqtt_publisher.disconnect()
         print("Publisher script telah dihentikan.")
-        sys.exit(0) # Pastikan program keluar sepenuhnya
+        sys.exit(0)
 
 if __name__ == "__main__":
     main_loop()

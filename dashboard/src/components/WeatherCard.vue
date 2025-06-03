@@ -112,10 +112,3 @@ export default {
   },
 };
 </script>
-
-<!-- Hapus atau komentari tag <style scoped> yang lama -->
-<!-- 
-<style scoped>
-... CSS kustom lama ...
-</style> 
--->

@@ -1,0 +1,6 @@
+streamlit
+paho-mqtt>=1.6.0
+python-dotenv
+streamlit-authenticator
+pandas
+plotly

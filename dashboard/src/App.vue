@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-screen-xl mx-auto p-4 md:p-6 lg:p-8">
-    {/* Menggantikan #app-main-container style */}
     <header class="text-center mb-8 pb-6 border-b-2 border-gray-200">
       <h1 class="text-3xl md:text-4xl font-bold text-slate-700 mb-2">
         Prakiraan Cuaca
@@ -53,7 +52,6 @@
     </header>
 
     <main class="mt-6">
-      {/* Menggantikan .app-main-content */}
       <WeatherDashboard
         :forecasts="allForecastsData"
         :is-loading="isLoadingData"
@@ -79,9 +77,7 @@ const DEFAULT_ADM4_CODE = "35.78.09.1001";
 
 export default {
   name: "App",
-  components: {
-    WeatherDashboard,
-  },
+  components: { WeatherDashboard },
   data() {
     return {
       mqttBrokerHost: "localhost",
@@ -95,6 +91,10 @@ export default {
       isLoadingData: true,
       locationInfo: { desa: "", kecamatan: "", kotkab: "", provinsi: "" },
       allForecastsData: [],
+      isLoggedIn: false,
+      loginUsername: "",
+      loginPassword: "",
+      loginError: "",
     };
   },
   computed: {
@@ -107,7 +107,7 @@ export default {
       } else if (this.mqttConnectionState === "error") {
         return "bg-red-100 text-red-700 border border-red-300";
       }
-      return "bg-blue-100 text-blue-700 border border-blue-300"; // Neutral/loading state
+      return "bg-blue-100 text-blue-700 border border-blue-300";
     },
   },
   mounted() {
@@ -236,7 +236,7 @@ export default {
             "connected"
           );
         } else if (this.isLoadingData && this.allForecastsData.length === 0) {
-          this.isLoadingData = false; // Stop loading jika tidak ada data setelah timeout
+          this.isLoadingData = false;
         }
       }, 5000);
     },
@@ -286,6 +286,20 @@ export default {
         );
       }
     },
+    handleLogin() {
+      // Ganti username/password sesuai kebutuhan
+      const validUser = "nabiel";
+      const validPass = "nabiel123";
+      if (
+        this.loginUsername === validUser &&
+        this.loginPassword === validPass
+      ) {
+        this.isLoggedIn = true;
+        this.loginError = "";
+      } else {
+        this.loginError = "Username atau password salah!";
+      }
+    },
   },
   beforeUnmount() {
     if (this.mqttClientInstance && this.mqttClientInstance.isConnected()) {
@@ -300,14 +314,6 @@ export default {
 };
 </script>
 
-<!-- 
-Hapus atau komentari tag <style> global yang lama jika semua styling sudah digantikan Tailwind.
-Jika ada style global yang masih relevan dan tidak bisa dicapai dengan Tailwind,
-Anda bisa memindahkannya ke src/index.css (tanpa @tailwind directives) atau membiarkannya di sini.
-Untuk proyek ini, kita asumsikan semua diganti Tailwind.
--->
-<!-- 
 <style>
-... CSS global lama ...
-</style> 
--->
+/* Tambahkan style di sini jika diperlukan */
+</style>
